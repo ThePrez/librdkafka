@@ -498,16 +498,8 @@ This provides a 'do what I want' interface to this complex problem space,
 rather than 'here are the tools to do what you want, good luck'.
 
 
-
-The Java Idempotent Producer's error strategy has lessened its strictness
-over time, and some of the corner cases are now handled optimistically rather
-than pesimistically, which might lead to allowing duplicate messages to
-be produced or message loss(FIXME?) (prior to KIP-360).
-
-To maintain the idempotent producer guarantees, librdkafka will aim
-for correctness and chooses a more stringent error strategy which treats
-unknown unrecoverable state as a fatal error, the details are outlined below
-and how it differs from the Java producer (as of Apache Kafka 2.0.0).
+The proposed error handling is outlined below and how it differs from
+the Java producer (as of Apache Kafka 2.0.0, pre KIP-360).
 
 
 
@@ -539,7 +531,7 @@ Librdkafka options (FIXME: choose one):
  C - rely on `producer.delivery.guarantees` to make the appropriate decision.
 
 Suggested option: C, it is the most user-friendly while still maintaining
-                  correctness.
+                  correctness. B can be added at a later time as an advanced API.
 
 
 The Java producer will fail the batch, reset the pid, and then continue
@@ -589,8 +581,6 @@ of duplication.
 librdkafka will follow suite, preferably using the proposed
 `producer.delivery.guarantees` configuration option, to allow
 the application to make a policy decision on what should be done.
-
-
 
 
 ###### Message persistance status
