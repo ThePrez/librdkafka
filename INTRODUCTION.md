@@ -509,6 +509,7 @@ the Java producer (as of Apache Kafka 2.0.0, pre KIP-360).
 This error is returned by the broker when the sequence number in the
 ProduceRequest does not match the expected next sequence
 for the given PID+Epoch+Partition (last BaseSeq + msgcount + 1).
+
 Note: sequence 0 is always accepted.
 
 If the failed request is the head-of-line (first) in-flight request it
@@ -519,16 +520,16 @@ risking message loss or duplication, and it is not safe for the
 application to manually retry messages.
 
 
-Librdkafka options (FIXME: choose one):
- A - librdkafka will trigger a fatal error and stop producing all partitions.
- B - pause the given partition on behalf of the application, which must
-     resume() it to continue producing after having handled the error.
-     With multiple outstanding requests, or messages in the same failed
-     request, it might not be safe to resume() on the first delivery report
-     with this error, so maybe a new API to acknowledge-error-and-continue
-     messages which internally counts the number of these failures.
-     Or we could propagate this information through the error callback.
- C - rely on `producer.delivery.guarantees` to make the appropriate decision.
+librdkafka options (FIXME: choose one):
+ * A - librdkafka will trigger a fatal error and stop producing all partitions.
+ * B - pause the given partition on behalf of the application, which must
+       resume() it to continue producing after having handled the error.
+       With multiple outstanding requests, or messages in the same failed
+       request, it might not be safe to resume() on the first delivery report
+       with this error, so maybe a new API to acknowledge-error-and-continue
+       messages which internally counts the number of these failures.
+       Or we could propagate this information through the error callback.
+ * C - rely on `producer.delivery.guarantees` to make the appropriate decision.
 
 Suggested option: C, it is the most user-friendly while still maintaining
                   correctness. B can be added at a later time as an advanced API.
@@ -578,6 +579,7 @@ when the partition leader changed.
 KIP-360 suggests removing this error checking in favour of letting the
 application decide if a retry should be performed, at the risk
 of duplication.
+
 librdkafka will follow suite, preferably using the proposed
 `producer.delivery.guarantees` configuration option, to allow
 the application to make a policy decision on what should be done.
